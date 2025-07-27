@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "358284275576",
+    "firebase_url": "https://gearnix-4eb6c-default-rtdb.firebaseio.com",
+    "project_id": "gearnix-4eb6c",
+    "storage_bucket": "gearnix-4eb6c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:358284275576:android:41b3508437913032b7a28d",
+        "android_client_info": {
+          "package_name": "com.example.c36a"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAGnTgLy-hmoro-jf6bMaFitEof9ASlzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:358284275576:android:bcbaa09a49f59aa3b7a28d",
+        "android_client_info": {
+          "package_name": "com.example.gearnix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAGnTgLy-hmoro-jf6bMaFitEof9ASlzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "C36A"
+rootProject.name = "gearnix"
 include(":app")
  

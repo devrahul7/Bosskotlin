@@ -2,17 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
-    namespace = "com.example.c36a"
-    compileSdk = 35
+    namespace = "com.example.gearnix"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.c36a"
-        minSdk = 27
-        targetSdk = 35
+        applicationId = "com.example.gearnix"
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -41,9 +40,7 @@ android {
 }
 
 dependencies {
-    implementation ("androidx.compose.material:material-icons-extended:1.6.1")
-    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
-    implementation("com.cloudinary:cloudinary-android:2.1.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,10 +49,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.firebase.auth)
-    implementation("io.coil-kt:coil-compose:2.2.2")
-    implementation(libs.firebase.database)
-    implementation("com.squareup.picasso:picasso:2.8")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

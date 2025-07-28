@@ -2,15 +2,58 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gearnix">
+        <activity
+            android:name=".view.DeleteProductActivity"
+            android:exported="false"
+            android:label="@string/title_activity_delete_product"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".view.EditProductActivity"
+            android:exported="false"
+            android:label="@string/title_activity_edit_product"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".view.ViewProductActivity"
+            android:exported="false"
+            android:label="@string/title_activity_view_product"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".model.GamingProduct"
+            android:exported="false"
+            android:label="@string/title_activity_gaming_product"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".utils.FirebaseUtils"
+            android:exported="false"
+            android:label="@string/title_activity_firebase_utils"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".view.ProductManagerActivity"
+            android:exported="false"
+            android:label="@string/title_activity_product_manager"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".view.UpdateProductActivity"
+            android:exported="false"
+            android:label="@string/title_activity_update_product"
+            android:theme="@style/Theme.Gearnix" />
+        <activity
+            android:name=".view.AddProductActivity"
+            android:exported="false"
+            android:label="Addzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" />
+        <activity
+            android:name=".view.DashboardActivity"
+            android:exported="false" />
         <activity
             android:name=".view.ResetPasswordActivity"
             android:exported="false"
@@ -20,11 +63,6 @@
             android:name=".view.RegistrationActivity"
             android:exported="false"
             android:label="@string/title_activity_registration"
-            android:theme="@style/Theme.Gearnix" />
-        <activity
-            android:name=".view.DashboardActivity"
-            android:exported="false"
-            android:label="@string/title_activity_dashboard"
             android:theme="@style/Theme.Gearnix" />
         <activity
             android:name=".view.LoginActivity"

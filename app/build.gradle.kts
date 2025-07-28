@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+
 }
 
 android {
@@ -41,7 +42,33 @@ android {
 }
 
 dependencies {
+//    implementation ("com.google.firebase:firebase-storage")
+//    implementation("com.google.firebase:firebase-storage")
 
+
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+
+    // Firebase Storage
+    implementation("com.google.firebase:firebase-storage")
+
+    // Coil for images
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // Accompanist Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+// LiveData with Compose integration - THIS IS THE KEY ONE
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
+// ViewModel and LiveData core libraries
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.5")
+// If you're using ViewModels in Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.cloudinary:cloudinary-android:2.2.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,6 +79,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.navigation.compose.jvmstubs)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

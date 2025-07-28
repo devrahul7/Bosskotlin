@@ -29,8 +29,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Star
+
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -221,7 +224,7 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                 // Gaming Controller or Logo Image
                 Image(
-                    painter = painterResource(R.drawable.img), // Replace with your gaming image
+                    painter = painterResource(R.drawable.img),
                     contentDescription = null,
                     modifier = Modifier
                         .height(180.dp)
@@ -284,9 +287,10 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
                                 unfocusedBorderColor = fieldBorderColor,
                                 focusedTextColor = textColor,
                                 unfocusedTextColor = textColor,
-                                cursorColor = neonBlue
-                            )
-                            ,
+                                cursorColor = neonBlue,
+                                focusedContainerColor = Color(0xFF0D1117),
+                                unfocusedContainerColor = Color(0xFF0D1117)
+                            ),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email
                             )
@@ -317,12 +321,10 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
                                     onClick = { passwordVisibility = !passwordVisibility }
                                 ) {
                                     Icon(
-                                        painter = painterResource(
-                                            if (passwordVisibility)
-                                                R.drawable.baseline_visibility_24
-                                            else
-                                                R.drawable.baseline_visibility_off_24
-                                        ),
+                                        imageVector = if (passwordVisibility)
+                                            Icons.Default.Star
+                                        else
+                                            Icons.Default.CheckCircle,
                                         contentDescription = null,
                                         tint = neonGreen
                                     )
@@ -339,9 +341,10 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
                                 unfocusedBorderColor = fieldBorderColor,
                                 focusedTextColor = textColor,
                                 unfocusedTextColor = textColor,
-                                cursorColor = neonBlue
-                            )
-                            ,
+                                cursorColor = neonBlue,
+                                focusedContainerColor = Color(0xFF0D1117),
+                                unfocusedContainerColor = Color(0xFF0D1117)
+                            ),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password
                             )
@@ -390,9 +393,15 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                         Spacer(modifier = Modifier.height(28.dp))
 
-                        // Gaming Login Button with Glow Effect
+                        // ✅ UPDATED: Gaming Login Button with User Data Saving
                         Button(
                             onClick = {
+                                if (username.isEmpty() || password.isEmpty()) {
+                                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                                    return@Button
+                                }
+
+                                // Save remember me credentials first
                                 if (rememberMe) {
                                     editor.putString("email", username)
                                     editor.putString("password", password)
@@ -401,6 +410,28 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                                 userViewModel.login(username, password) { success, message ->
                                     if (success) {
+                                        // ✅ NEW: Load and save complete user data after successful login
+                                        userViewModel.getUserData(username) { userData ->
+                                            val sharedPrefs = context.getSharedPreferences("User", Context.MODE_PRIVATE)
+                                            val editor = sharedPrefs.edit()
+
+                                            if (userData != null) {
+                                                // Save complete user data to SharedPreferences
+                                                editor.putString("email", userData.email)
+                                                editor.putString("fullName", userData.fullName)
+                                                editor.putString("phone", userData.phoneNumber)
+                                                editor.putString("address", userData.address)
+                                            } else {
+                                                // Fallback: save at least email
+                                                editor.putString("email", username)
+                                            }
+
+                                            if (rememberMe) {
+                                                editor.putString("password", password)
+                                            }
+                                            editor.apply()
+                                        }
+
                                         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                                         val intent = Intent(context, DashboardActivity::class.java)
                                         context.startActivity(intent)
@@ -505,7 +536,6 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
                             )
                     )
                 }
-
 
                 Spacer(modifier = Modifier.height(32.dp))
 

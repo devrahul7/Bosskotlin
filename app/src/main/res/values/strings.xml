@@ -5,4 +5,12 @@
     <string name="title_activity_dashboard">DashboardActivity</string>
     <string name="title_activity_registration">RegistrationActivity</string>
     <string name="title_activity_reset_password">ResetPasswordActivity</string>
+    <string name="title_activity_add_product">AddProductActivity</string>
+    <string name="title_activity_view_product">ViewProductActivity</string>
+    <string name="title_activity_edit_product">EditProductActivity</string>
+    <string name="title_activity_delete_product">DeleteProductActivity</string>
+    <string name="title_activity_update_product">UpdateProductActivity</string>
+    <string name="title_activity_product_manager">ProductManager</string>
+    <string name="title_activity_firebase_utils">FirebaseUtils</string>
+    <string name="title_activity_gaming_product">GamingProduct</string>
 </resources>

@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
@@ -205,7 +206,7 @@ fun RegistrationBody() {
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                // Gaming Image/Icon - FIXED: Removed try-catch
+                // Gaming Image/Icon
                 Box(
                     modifier = Modifier
                         .size(160.dp)
@@ -337,7 +338,7 @@ fun RegistrationBody() {
                                         imageVector = if (passwordVisibility)
                                             Icons.Default.Star
                                         else
-                                            Icons.Default.Star,
+                                            Icons.Default.CheckCircle,
                                         contentDescription = null,
                                         tint = neonGreen
                                     )
@@ -381,7 +382,7 @@ fun RegistrationBody() {
                                         imageVector = if (confirmPasswordVisibility)
                                             Icons.Default.Star
                                         else
-                                            Icons.Default.Star,
+                                            Icons.Default.CheckCircle,
                                         contentDescription = null,
                                         tint = neonPurple
                                     )
@@ -489,7 +490,7 @@ fun RegistrationBody() {
 
                         Spacer(modifier = Modifier.height(25.dp))
 
-                        // Register Button
+                        // ✅ FIXED: Register Button with SharedPreferences saving
                         Button(
                             onClick = {
                                 // Same validation logic
@@ -516,6 +517,15 @@ fun RegistrationBody() {
                                         )
                                         userViewModel.addUserToDatabase(userId, userModel) { success, message ->
                                             if (success) {
+                                                // ✅ NEW: Save user data to SharedPreferences for profile display
+                                                val sharedPreferences = context.getSharedPreferences("User", android.content.Context.MODE_PRIVATE)
+                                                val editor = sharedPreferences.edit()
+                                                editor.putString("email", email)
+                                                editor.putString("fullName", fullName)
+                                                editor.putString("phone", phoneNumber)
+                                                editor.putString("address", address)
+                                                editor.apply()
+
                                                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                                                 val intent = Intent(context, LoginActivity::class.java)
                                                 context.startActivity(intent)

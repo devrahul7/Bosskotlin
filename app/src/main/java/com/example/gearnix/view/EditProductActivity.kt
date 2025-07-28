@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
@@ -305,18 +306,47 @@ fun EditProductBody() {
                                         fontSize = 48.sp
                                     )
                                     Text(
-                                        text = "NO PRODUCTS TO EDIT",
+                                        text = if (validProducts.isEmpty()) "NO PRODUCTS ADDED YET" else "NO MATCHING PRODUCTS",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = neonPurple,
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
+                                        letterSpacing = 1.sp
                                     )
                                     Text(
-                                        text = "Try adjusting your search",
+                                        text = if (validProducts.isEmpty())
+                                            "Add some gaming products first to edit them"
+                                        else
+                                            "Try adjusting your search terms",
                                         fontSize = 14.sp,
                                         color = placeholderColor,
                                         textAlign = TextAlign.Center
                                     )
+
+                                    if (validProducts.isEmpty()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+
+                                        Button(
+                                            onClick = {
+                                                val intent = Intent(context, AddProductActivity::class.java)
+                                                context.startActivity(intent)
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = neonBlue),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                "ADD FIRST PRODUCT",
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

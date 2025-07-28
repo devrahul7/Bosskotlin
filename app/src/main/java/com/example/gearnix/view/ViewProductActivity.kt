@@ -23,10 +23,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -302,18 +305,47 @@ fun ViewProductBody() {
                                         fontSize = 48.sp
                                     )
                                     Text(
-                                        text = if (searchQuery.isEmpty()) "NO GAMING GEAR FOUND" else "NO MATCHING PRODUCTS",
+                                        text = if (searchQuery.isEmpty()) "NO PRODUCTS ADDED YET" else "NO MATCHING PRODUCTS",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = neonPurple,
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
+                                        letterSpacing = 1.sp
                                     )
                                     Text(
-                                        text = if (searchQuery.isEmpty()) "Add your first gaming product" else "Try adjusting your search",
+                                        text = if (searchQuery.isEmpty())
+                                            "Add your first gaming product to get started"
+                                        else
+                                            "Try adjusting your search terms",
                                         fontSize = 14.sp,
                                         color = placeholderColor,
                                         textAlign = TextAlign.Center
                                     )
+
+                                    if (searchQuery.isEmpty()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+
+                                        Button(
+                                            onClick = {
+                                                val intent = Intent(context, AddProductActivity::class.java)
+                                                context.startActivity(intent)
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = neonBlue),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                "ADD FIRST PRODUCT",
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

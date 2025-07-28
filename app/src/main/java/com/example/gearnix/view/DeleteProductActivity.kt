@@ -3,6 +3,7 @@ package com.example.gearnix.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,9 +25,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -97,12 +100,13 @@ fun DeleteProductBody() {
     var selectedProduct by remember { mutableStateOf<ProductModel?>(null) }
     var isDeleting by remember { mutableStateOf(false) }
 
-    // Observe products from ViewModel
+    // 🔥 UPDATED: Observe products with better state management
     val allProducts by productViewModel.allProducts.observeAsState(emptyList())
     val isLoading by productViewModel.loading.observeAsState(false)
 
-    // Load products when activity starts
+    // 🔥 IMPROVED: Load products when activity starts
     LaunchedEffect(Unit) {
+        Log.d("DeleteProductActivity", "Component launched, loading products...")
         productViewModel.getAllProduct()
     }
 
@@ -134,6 +138,9 @@ fun DeleteProductBody() {
         Color(0xFF21262D)
     )
 
+    // Debug logging
+    Log.d("DeleteProductActivity", "Render - isLoading: $isLoading, validProducts.size: ${validProducts.size}")
+
     Scaffold(
         containerColor = backgroundColor,
         topBar = {
@@ -159,6 +166,22 @@ fun DeleteProductBody() {
                             contentDescription = "Back",
                             tint = neonBlue,
                             modifier = Modifier.size(28.dp)
+                        )
+                    }
+                },
+                actions = {
+                    // 🔥 ADDED: Refresh button
+                    IconButton(
+                        onClick = {
+                            Log.d("DeleteProductActivity", "Refresh button clicked")
+                            productViewModel.refreshProducts()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = neonGreen,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -275,93 +298,149 @@ fun DeleteProductBody() {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Loading Indicator
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                // 🔥 IMPROVED: Better state management for products display
+                when {
+                    isLoading -> {
+                        // Loading State
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(
-                                color = neonBlue,
-                                strokeWidth = 3.dp
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Loading products...",
-                                color = neonBlue,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    color = neonBlue,
+                                    strokeWidth = 3.dp,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "LOADING PRODUCTS TO DELETE...",
+                                    color = neonBlue,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "Preparing danger zone",
+                                    color = placeholderColor,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
-                }
 
-                // Products List
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filteredProducts) { product ->
-                        DeletableProductCard(
-                            product = product,
-                            onDeleteClick = {
-                                selectedProduct = product
-                                showDeleteDialog = true
-                            },
-                            cardColor = cardColor,
-                            neonBlue = neonBlue,
-                            neonPurple = neonPurple,
-                            neonGreen = neonGreen,
-                            dangerRed = dangerRed,
-                            textColor = textColor,
-                            placeholderColor = placeholderColor
-                        )
+                    filteredProducts.isEmpty() -> {
+                        // Empty State
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = cardColor)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = when {
+                                        validProducts.isEmpty() -> "🎮"
+                                        searchQuery.isNotEmpty() -> "🔍"
+                                        else -> "🎉"
+                                    },
+                                    fontSize = 48.sp
+                                )
+                                Text(
+                                    text = when {
+                                        validProducts.isEmpty() -> "NO PRODUCTS ADDED YET"
+                                        searchQuery.isNotEmpty() -> "NO MATCHING PRODUCTS"
+                                        else -> "ALL PRODUCTS DELETED"
+                                    },
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = when {
+                                        validProducts.isEmpty() -> neonPurple
+                                        searchQuery.isNotEmpty() -> neonPurple
+                                        else -> neonGreen
+                                    },
+                                    textAlign = TextAlign.Center,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = when {
+                                        validProducts.isEmpty() -> "Add some gaming products first to manage them"
+                                        searchQuery.isNotEmpty() -> "Try adjusting your search terms"
+                                        else -> "Your inventory is completely clean"
+                                    },
+                                    fontSize = 14.sp,
+                                    color = placeholderColor,
+                                    textAlign = TextAlign.Center
+                                )
+
+                                if (validProducts.isEmpty()) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    Button(
+                                        onClick = {
+                                            val intent = Intent(context, AddProductActivity::class.java)
+                                            context.startActivity(intent)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = neonBlue),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            "ADD FIRST PRODUCT",
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    if (filteredProducts.isEmpty() && !isLoading) {
-                        item {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardColor)
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(32.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = if (validProducts.isEmpty()) "🎉" else "🔍",
-                                        fontSize = 48.sp
-                                    )
-                                    Text(
-                                        text = if (validProducts.isEmpty()) "ALL CLEAN!" else "NO MATCHING PRODUCTS",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (validProducts.isEmpty()) neonGreen else neonPurple,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Text(
-                                        text = if (validProducts.isEmpty()) "No products in inventory" else "Try adjusting your search",
-                                        fontSize = 14.sp,
-                                        color = placeholderColor,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                    else -> {
+                        // Products List
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(filteredProducts) { product ->
+                                DeletableProductCard(
+                                    product = product,
+                                    onDeleteClick = {
+                                        selectedProduct = product
+                                        showDeleteDialog = true
+                                    },
+                                    cardColor = cardColor,
+                                    neonBlue = neonBlue,
+                                    neonPurple = neonPurple,
+                                    neonGreen = neonGreen,
+                                    dangerRed = dangerRed,
+                                    textColor = textColor,
+                                    placeholderColor = placeholderColor
+                                )
                             }
                         }
                     }
                 }
             }
 
-            // Delete Confirmation Dialog
+            // 🔥 IMPROVED: Delete Confirmation Dialog
             if (showDeleteDialog && selectedProduct != null) {
                 AlertDialog(
                     onDismissRequest = {
-                        if (!isDeleting) showDeleteDialog = false
+                        if (!isDeleting) {
+                            showDeleteDialog = false
+                            selectedProduct = null
+                        }
                     },
                     icon = {
                         Icon(
@@ -410,13 +489,20 @@ fun DeleteProductBody() {
                         Button(
                             onClick = {
                                 isDeleting = true
+                                Log.d("DeleteProductActivity", "Deleting product: ${selectedProduct!!.productName}")
+
                                 productViewModel.deleteProduct(selectedProduct!!.productID) { success, message ->
                                     isDeleting = false
                                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+
                                     if (success) {
+                                        Log.d("DeleteProductActivity", "Product deleted successfully, refreshing list")
                                         showDeleteDialog = false
                                         selectedProduct = null
-                                        productViewModel.getAllProduct() // Refresh list
+                                        // 🔥 CRITICAL FIX: Force refresh after deletion
+                                        productViewModel.refreshProducts()
+                                    } else {
+                                        Log.e("DeleteProductActivity", "Failed to delete product: $message")
                                     }
                                 }
                             },
@@ -442,7 +528,10 @@ fun DeleteProductBody() {
                     dismissButton = {
                         Button(
                             onClick = {
-                                if (!isDeleting) showDeleteDialog = false
+                                if (!isDeleting) {
+                                    showDeleteDialog = false
+                                    selectedProduct = null
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF30363D)),
                             shape = RoundedCornerShape(8.dp),

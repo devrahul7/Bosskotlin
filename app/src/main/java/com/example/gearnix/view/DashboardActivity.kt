@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -112,12 +113,13 @@ fun DashboardBody() {
     var userPhone by remember { mutableStateOf("") }
     var userAddress by remember { mutableStateOf("") }
 
-    // Observe products from ViewModel
+    // 🔥 UPDATED: Observe products with better state management
     val allProducts by productViewModel.allProducts.observeAsState(emptyList())
     val isLoading by productViewModel.loading.observeAsState(false)
 
-    // Load products when activity starts
+    // 🔥 IMPROVED: Load products when activity starts
     LaunchedEffect(Unit) {
+        Log.d("DashboardActivity", "Component launched, loading products...")
         productViewModel.getAllProduct()
 
         // Load user data from SharedPreferences
@@ -128,7 +130,7 @@ fun DashboardBody() {
         userAddress = sharedPreferences.getString("address", "Gaming HQ") ?: "Gaming HQ"
     }
 
-    // Gaming color scheme - Dark with neon accents
+    // Gaming color scheme
     val backgroundColor = Color(0xFF0D1117)
     val cardColor = Color(0xFF161B22)
     val neonBlue = Color(0xFF00D9FF)
@@ -143,14 +145,16 @@ fun DashboardBody() {
         Color(0xFF21262D)
     )
 
-    // Filter non-null products
+    // 🔥 IMPROVED: Better product filtering and stats
     val validProducts = allProducts.filterNotNull()
     val totalProducts = validProducts.size
     val totalValue = validProducts.sumOf { it.price }
 
+    // Debug logging
+    Log.d("DashboardActivity", "Render - isLoading: $isLoading, validProducts.size: ${validProducts.size}")
+
     Scaffold(
         floatingActionButton = {
-            // Quick Add Product FAB
             FloatingActionButton(
                 onClick = {
                     val intent = Intent(context, AddProductActivity::class.java)
@@ -226,18 +230,21 @@ fun DashboardBody() {
                     }
 
                     Row {
-                        // Refresh Button
+                        // 🔥 UPDATED: Refresh Button with better functionality
                         IconButton(
-                            onClick = { productViewModel.getAllProduct() }
+                            onClick = {
+                                Log.d("DashboardActivity", "Refresh button clicked")
+                                productViewModel.refreshProducts()
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh",
+                                contentDescription = "Refresh Products",
                                 tint = neonGreen,
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                        // Profile Icon Button
+
                         IconButton(
                             onClick = { showProfileModal = true }
                         ) {
@@ -272,7 +279,6 @@ fun DashboardBody() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Products Stats Card
                     StatsCard(
                         title = "PRODUCTS",
                         value = totalProducts.toString(),
@@ -281,7 +287,6 @@ fun DashboardBody() {
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Total Value Stats Card
                     StatsCard(
                         title = "VALUE",
                         value = "$${String.format("%.0f", totalValue)}",
@@ -307,7 +312,6 @@ fun DashboardBody() {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Add Product Button
                     ActionButton(
                         title = "ADD NEW PRODUCT",
                         subtitle = "Add gaming keyboards, mice & accessories",
@@ -319,7 +323,6 @@ fun DashboardBody() {
                         }
                     )
 
-                    // View Products Button
                     ActionButton(
                         title = "VIEW ALL PRODUCTS",
                         subtitle = "Browse and manage your gaming inventory",
@@ -331,7 +334,6 @@ fun DashboardBody() {
                         }
                     )
 
-                    // Edit Products Button
                     ActionButton(
                         title = "EDIT PRODUCTS",
                         subtitle = "Update product details and specifications",
@@ -343,7 +345,6 @@ fun DashboardBody() {
                         }
                     )
 
-                    // Delete Products Button
                     ActionButton(
                         title = "DELETE PRODUCTS",
                         subtitle = "Remove products from your inventory",
@@ -383,85 +384,128 @@ fun DashboardBody() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Display Real Products
-                if (validProducts.isEmpty() && !isLoading) {
-                    // Empty State
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = cardColor.copy(alpha = 0.6f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                // 🔥 IMPROVED: Better state management for products display
+                when {
+                    isLoading -> {
+                        // Loading State
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "🎮",
-                                fontSize = 48.sp
-                            )
-                            Text(
-                                text = "NO GAMING GEAR YET",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = neonPurple,
-                                textAlign = TextAlign.Center
-                            )
-                            Text(
-                                text = "Add your first epic gaming gear to get started",
-                                fontSize = 14.sp,
-                                color = textColor.copy(alpha = 0.7f),
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, AddProductActivity::class.java)
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = neonBlue)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
+                                CircularProgressIndicator(
+                                    color = neonBlue,
+                                    strokeWidth = 3.dp,
+                                    modifier = Modifier.size(48.dp)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("ADD FIRST PRODUCT")
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "LOADING GAMING ARSENAL...",
+                                    color = neonBlue,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "Preparing your epic gaming gear",
+                                    color = placeholderColor,
+                                    fontSize = 12.sp
+                                )
                             }
                         }
                     }
-                } else {
-                    // Display Products in Grid
-                    LazyColumn(
-                        modifier = Modifier.height(400.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(validProducts) { product ->
-                            ProductCard(
-                                product = product,
-                                cardColor = cardColor,
-                                neonBlue = neonBlue,
-                                neonPurple = neonPurple,
-                                neonGreen = neonGreen,
-                                textColor = textColor,
-                                placeholderColor = placeholderColor,
-                                onEditClick = {
-                                    val intent = Intent(context, EditProductActivity::class.java)
-                                    intent.putExtra("productId", product.productID)
-                                    context.startActivity(intent)
-                                },
-                                onDeleteClick = {
-                                    val intent = Intent(context, DeleteProductActivity::class.java)
-                                    intent.putExtra("productId", product.productID)
-                                    context.startActivity(intent)
-                                }
+
+                    validProducts.isEmpty() -> {
+                        // Empty State
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = cardColor.copy(alpha = 0.6f)
                             )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "🎮",
+                                    fontSize = 48.sp
+                                )
+                                Text(
+                                    text = "NO PRODUCTS ADDED YET",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = neonPurple,
+                                    textAlign = TextAlign.Center,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "Start building your gaming arsenal by adding your first epic product",
+                                    fontSize = 14.sp,
+                                    color = textColor.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Center
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(context, AddProductActivity::class.java)
+                                        context.startActivity(intent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = neonBlue),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "ADD FIRST PRODUCT",
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    else -> {
+                        // Products List
+                        LazyColumn(
+                            modifier = Modifier.height(400.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(validProducts) { product ->
+                                ProductCard(
+                                    product = product,
+                                    cardColor = cardColor,
+                                    neonBlue = neonBlue,
+                                    neonPurple = neonPurple,
+                                    neonGreen = neonGreen,
+                                    textColor = textColor,
+                                    placeholderColor = placeholderColor,
+                                    onEditClick = {
+                                        val intent = Intent(context, EditProductActivity::class.java)
+                                        intent.putExtra("productId", product.productID)
+                                        context.startActivity(intent)
+                                    },
+                                    onDeleteClick = {
+                                        val intent = Intent(context, DeleteProductActivity::class.java)
+                                        intent.putExtra("productId", product.productID)
+                                        context.startActivity(intent)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -525,7 +569,7 @@ fun DashboardBody() {
     }
 }
 
-// NEW: Product Card Component
+// Product Card Component
 @Composable
 fun ProductCard(
     product: ProductModel,
@@ -645,7 +689,8 @@ fun ProductCard(
     }
 }
 
-// Keep all existing composable functions (ProfileModal, StatsCard, ActionButton, etc.)
+// Keep all existing ProfileModal, StatsCard, ActionButton composables as they were...
+
 @Composable
 fun ProfileModal(
     userFullName: String,
@@ -674,7 +719,7 @@ fun ProfileModal(
             Card(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .clickable { } // Prevent click through
+                    .clickable { }
                     .shadow(
                         elevation = 24.dp,
                         shape = RoundedCornerShape(24.dp),
@@ -690,7 +735,6 @@ fun ProfileModal(
                     modifier = Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Header with close button
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -716,7 +760,6 @@ fun ProfileModal(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Gaming Profile Avatar
                     Box(
                         modifier = Modifier
                             .size(100.dp)
@@ -741,7 +784,6 @@ fun ProfileModal(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Player Name
                     Text(
                         text = userFullName.ifEmpty { "Gaming Master" },
                         fontSize = 20.sp,
@@ -761,11 +803,9 @@ fun ProfileModal(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // User Details
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Email
                         ProfileInfoRow(
                             icon = Icons.Default.Email,
                             label = "GAMING EMAIL",
@@ -775,7 +815,6 @@ fun ProfileModal(
                             placeholderColor = placeholderColor
                         )
 
-                        // Phone
                         ProfileInfoRow(
                             icon = Icons.Default.Phone,
                             label = "CONTACT",
@@ -785,7 +824,6 @@ fun ProfileModal(
                             placeholderColor = placeholderColor
                         )
 
-                        // Address
                         ProfileInfoRow(
                             icon = Icons.Default.LocationOn,
                             label = "GAMING HQ",
@@ -798,7 +836,6 @@ fun ProfileModal(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Close Button
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier

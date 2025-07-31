@@ -33,6 +33,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -298,13 +300,13 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Password Field with Gaming Style
+                        // Password Field with Gaming Style - UPDATED WITH EYE ICONS
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
                             placeholder = {
                                 Text(
-                                    "Enter your password",
+                                    text = "Enter your password",
                                     color = placeholderColor,
                                     fontSize = 14.sp
                                 )
@@ -322,10 +324,10 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
                                 ) {
                                     Icon(
                                         imageVector = if (passwordVisibility)
-                                            Icons.Default.Star
+                                            Icons.Default.Visibility
                                         else
-                                            Icons.Default.CheckCircle,
-                                        contentDescription = null,
+                                            Icons.Default.VisibilityOff,
+                                        contentDescription = if (passwordVisibility) "Hide password" else "Show password",
                                         tint = neonGreen
                                     )
                                 }
@@ -393,7 +395,7 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                         Spacer(modifier = Modifier.height(28.dp))
 
-                        // ✅ UPDATED: Gaming Login Button with User Data Saving
+                        // Gaming Login Button with User Data Saving
                         Button(
                             onClick = {
                                 if (username.isEmpty() || password.isEmpty()) {
@@ -410,7 +412,7 @@ fun LoginBody(innerPaddingValues: PaddingValues) {
 
                                 userViewModel.login(username, password) { success, message ->
                                     if (success) {
-                                        // ✅ NEW: Load and save complete user data after successful login
+                                        // Load and save complete user data after successful login
                                         userViewModel.getUserData(username) { userData ->
                                             val sharedPrefs = context.getSharedPreferences("User", Context.MODE_PRIVATE)
                                             val editor = sharedPrefs.edit()

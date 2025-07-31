@@ -45,7 +45,7 @@ dependencies {
 //    implementation ("com.google.firebase:firebase-storage")
 //    implementation("com.google.firebase:firebase-storage")
 
-
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
 
     // Firebase Storage

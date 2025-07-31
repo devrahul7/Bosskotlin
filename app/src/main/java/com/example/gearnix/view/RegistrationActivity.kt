@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -336,9 +338,9 @@ fun RegistrationBody() {
                                 IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
                                     Icon(
                                         imageVector = if (passwordVisibility)
-                                            Icons.Default.Star
+                                            Icons.Default.Visibility
                                         else
-                                            Icons.Default.CheckCircle,
+                                            Icons.Default.VisibilityOff,
                                         contentDescription = null,
                                         tint = neonGreen
                                     )
@@ -380,9 +382,9 @@ fun RegistrationBody() {
                                 IconButton(onClick = { confirmPasswordVisibility = !confirmPasswordVisibility }) {
                                     Icon(
                                         imageVector = if (confirmPasswordVisibility)
-                                            Icons.Default.Star
+                                            Icons.Default.Visibility
                                         else
-                                            Icons.Default.CheckCircle,
+                                            Icons.Default.VisibilityOff,
                                         contentDescription = null,
                                         tint = neonPurple
                                     )

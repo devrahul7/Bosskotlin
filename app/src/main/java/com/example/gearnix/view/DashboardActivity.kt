@@ -1,5 +1,6 @@
 package com.example.gearnix.view
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +42,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -52,6 +56,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -349,22 +354,23 @@ fun DashboardBody() {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ✅ FIXED: Gaming Stats Cards with Proper Icons
+                // Gaming Stats Cards
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     StatsCard(
                         title = "PRODUCTS",
                         value = totalProducts.toString(),
-                        icon = Icons.Default.Inventory, // ✅ FIXED: Changed from Warning
+                        icon = Icons.Default.Inventory,
                         color = neonBlue,
                         modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
                     StatsCard(
                         title = "VALUE",
                         value = "$${String.format("%.0f", totalValue)}",
-                        icon = Icons.Default.AttachMoney, // ✅ FIXED: Changed from Face
+                        icon = Icons.Default.AttachMoney,
                         color = neonPurple,
                         modifier = Modifier.weight(1f)
                     )
@@ -675,7 +681,60 @@ fun DashboardBody() {
     }
 }
 
-// ✅ FIXED: ActionButton with proper arrow icon
+// Heart Toggle Button Component
+@SuppressLint("UnusedTransitionTargetStateParameter")
+@Composable
+fun HeartToggleButton(
+    isLiked: Boolean,
+    onToggle: () -> Unit,
+    neonBlue: Color,
+    modifier: Modifier = Modifier
+) {
+    IconToggleButton(
+        checked = isLiked,
+        onCheckedChange = { onToggle() },
+        modifier = modifier.size(48.dp)
+    ) {
+        // Animate the transition
+        val transition = updateTransition(isLiked, label = "heart")
+
+        // Animate color
+        val tint by transition.animateColor(
+            label = "heartColor",
+            transitionSpec = {
+                tween(durationMillis = 300)
+            }
+        ) { liked ->
+            if (liked) Color.Red else neonBlue.copy(alpha = 0.7f)
+        }
+
+        // Animate size for a nice effect
+        val size by transition.animateDp(
+            label = "heartSize",
+            transitionSpec = {
+                if (false isTransitioningTo true) {
+                    keyframes {
+                        durationMillis = 300
+                        24.dp at 0
+                        28.dp at 100
+                        24.dp at 200
+                    }
+                } else {
+                    tween(durationMillis = 150)
+                }
+            }
+        ) { 24.dp }
+
+        Icon(
+            imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            contentDescription = if (isLiked) "Remove from favorites" else "Add to favorites",
+            tint = tint,
+            modifier = Modifier.size(size)
+        )
+    }
+}
+
+// ActionButton Component
 @Composable
 fun ActionButton(
     title: String,
@@ -747,7 +806,6 @@ fun ActionButton(
                 )
             }
 
-            // ✅ FIXED: Changed from Warning to ArrowForward
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
@@ -758,6 +816,7 @@ fun ActionButton(
     }
 }
 
+// Updated ProductCard with Heart Toggle
 @Composable
 fun ProductCard(
     product: ProductModel,
@@ -770,6 +829,9 @@ fun ProductCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    // State for heart toggle - each product has its own state
+    var isLiked by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -781,96 +843,116 @@ fun ProductCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Product Image
-            Card(
-                modifier = Modifier.size(80.dp),
-                shape = RoundedCornerShape(12.dp)
+        Column {
+            // Top row with heart toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (product.image.isNotEmpty()) {
-                    AsyncImage(
-                        model = product.image,
-                        contentDescription = product.productName,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(neonBlue.copy(alpha = 0.1f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "🎮",
-                            fontSize = 24.sp
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Heart Toggle Button
+                HeartToggleButton(
+                    isLiked = isLiked,
+                    onToggle = { isLiked = !isLiked },
+                    neonBlue = neonBlue
+                )
+            }
+
+            // Main product content
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Product Image
+                Card(
+                    modifier = Modifier.size(80.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    if (product.image.isNotEmpty()) {
+                        AsyncImage(
+                            model = product.image,
+                            contentDescription = product.productName,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(neonBlue.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "🎮",
+                                fontSize = 24.sp
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            // Product Details
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = product.productName,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = product.description,
-                    fontSize = 12.sp,
-                    color = placeholderColor,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-
-                Text(
-                    text = "$${product.price}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = neonGreen,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-            // Action Buttons
-            Column {
-                IconButton(
-                    onClick = onEditClick,
-                    modifier = Modifier.size(40.dp)
+                // Product Details
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = neonBlue,
-                        modifier = Modifier.size(20.dp)
+                    Text(
+                        text = product.productName,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = product.description,
+                        fontSize = 12.sp,
+                        color = placeholderColor,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    Text(
+                        text = "$${product.price}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = neonGreen,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
 
-                IconButton(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color(0xFFFF6B6B),
-                        modifier = Modifier.size(20.dp)
-                    )
+                // Action Buttons
+                Column {
+                    IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = neonBlue,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color(0xFFFF6B6B),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

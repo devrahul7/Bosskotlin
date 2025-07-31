@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -40,7 +39,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -141,7 +139,6 @@ fun DashboardBody() {
     val neonGreen = Color(0xFF39FF14)
     val textColor = Color.White
     val placeholderColor = Color(0xFF8B949E)
-    val heartRed = Color(0xFFFF3040)
 
     val gradientColors = listOf(
         Color(0xFF0D1117),
@@ -158,7 +155,8 @@ fun DashboardBody() {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    Toast.makeText(context, "Add Product Feature", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, AddProductActivity::class.java)
+                    context.startActivity(intent)
                 },
                 containerColor = neonBlue,
                 contentColor = Color.Black,
@@ -359,14 +357,14 @@ fun DashboardBody() {
                     StatsCard(
                         title = "PRODUCTS",
                         value = totalProducts.toString(),
-                        icon = Icons.Default.Inventory,
+                        icon = Icons.Default.Inventory, // ✅ FIXED: Changed from Warning
                         color = neonBlue,
                         modifier = Modifier.weight(1f)
                     )
                     StatsCard(
                         title = "VALUE",
                         value = "$${String.format("%.0f", totalValue)}",
-                        icon = Icons.Default.AttachMoney,
+                        icon = Icons.Default.AttachMoney, // ✅ FIXED: Changed from Face
                         color = neonPurple,
                         modifier = Modifier.weight(1f)
                     )
@@ -394,7 +392,8 @@ fun DashboardBody() {
                         icon = Icons.Default.Add,
                         backgroundColor = neonBlue,
                         onClick = {
-                            Toast.makeText(context, "Add Product Feature", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, AddProductActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
 
@@ -404,7 +403,8 @@ fun DashboardBody() {
                         icon = Icons.Default.Favorite,
                         backgroundColor = neonGreen,
                         onClick = {
-                            Toast.makeText(context, "View Products Feature", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, ViewProductActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
 
@@ -414,7 +414,8 @@ fun DashboardBody() {
                         icon = Icons.Default.Edit,
                         backgroundColor = neonPurple,
                         onClick = {
-                            Toast.makeText(context, "Edit Products Feature", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, EditProductActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
 
@@ -424,7 +425,8 @@ fun DashboardBody() {
                         icon = Icons.Default.Delete,
                         backgroundColor = Color(0xFFFF6B6B),
                         onClick = {
-                            Toast.makeText(context, "Delete Products Feature", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, DeleteProductActivity::class.java)
+                            context.startActivity(intent)
                         }
                     )
                 }
@@ -537,7 +539,8 @@ fun DashboardBody() {
 
                                 Button(
                                     onClick = {
-                                        Toast.makeText(context, "Add First Product", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(context, AddProductActivity::class.java)
+                                        context.startActivity(intent)
                                     },
                                     colors = ButtonDefaults.buttonColors(containerColor = neonBlue),
                                     shape = RoundedCornerShape(12.dp)
@@ -559,7 +562,7 @@ fun DashboardBody() {
                     }
 
                     else -> {
-                        // Products List with Hearts
+                        // Products List
                         LazyColumn(
                             modifier = Modifier.height(400.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -573,12 +576,15 @@ fun DashboardBody() {
                                     neonGreen = neonGreen,
                                     textColor = textColor,
                                     placeholderColor = placeholderColor,
-                                    heartRed = heartRed,
                                     onEditClick = {
-                                        Toast.makeText(context, "Edit ${product.productName}", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(context, EditProductActivity::class.java)
+                                        intent.putExtra("productId", product.productID)
+                                        context.startActivity(intent)
                                     },
                                     onDeleteClick = {
-                                        Toast.makeText(context, "Delete ${product.productName}", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(context, DeleteProductActivity::class.java)
+                                        intent.putExtra("productId", product.productID)
+                                        context.startActivity(intent)
                                     }
                                 )
                             }
@@ -669,6 +675,7 @@ fun DashboardBody() {
     }
 }
 
+// ✅ FIXED: ActionButton with proper arrow icon
 @Composable
 fun ActionButton(
     title: String,
@@ -740,6 +747,7 @@ fun ActionButton(
                 )
             }
 
+            // ✅ FIXED: Changed from Warning to ArrowForward
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
@@ -750,7 +758,6 @@ fun ActionButton(
     }
 }
 
-// ✅ FIXED: ProductCard without problematic isFavorite and updateProductFavorite
 @Composable
 fun ProductCard(
     product: ProductModel,
@@ -760,13 +767,9 @@ fun ProductCard(
     neonGreen: Color,
     textColor: Color,
     placeholderColor: Color,
-    heartRed: Color,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    // ✅ FIXED: Simple local state without database dependency
-    var isFavorite by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -844,28 +847,8 @@ fun ProductCard(
                 )
             }
 
-            // Action Buttons Column with Heart
+            // Action Buttons
             Column {
-                // ✅ FIXED: Heart Button without database calls
-                IconButton(
-                    onClick = {
-                        isFavorite = !isFavorite
-                        Toast.makeText(
-                            LocalContext.current,
-                            if (isFavorite) "Added to favorites ❤️" else "Removed from favorites",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                        tint = if (isFavorite) heartRed else placeholderColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
                 IconButton(
                     onClick = onEditClick,
                     modifier = Modifier.size(40.dp)
